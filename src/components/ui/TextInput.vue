@@ -1,61 +1,71 @@
 <template>
     <div class="input-wrapper">
         <input
-                v-bind:type="(password && hidden) ? 'password' : 'text'"
-                class="text-input"
-                v-bind:placeholder="placeholder"
-                v-bind:maxlength="password ? 24 : 524288"
-        >
-        <i v-if="password"
-           class="material-icons eye no-select"
-           @click="toggleVisibility()"
+            v-bind:type="(password && hidden) ? 'password' : 'text'"
+            :class="['text-input', {'disabled': disabled}]"
+            :placeholder="placeholder"
+            :disabled="disabled"
+            v-model="value"
+            @input="$emit('input', $event.target.value)"
+        />
+        <i
+            v-if="password"
+            class="material-icons eye no-select"
+            @click="toggleVisibility"
         >{{hidden ? "visibility" : "visibility_off"}}</i>
     </div>
 </template>
 
 <script>
-    export default {
-        name: "TextInput",
-        props: {
-            placeholder: String,
-            password: Boolean
+export default {
+    name: "TextInput",
+    props: {
+        placeholder: String,
+        password: Boolean,
+        disabled: Boolean
+    },
+    data() {
+        return {
+            hidden: true,
+            value: "",
+        };
+    },
+    methods: {
+        toggleVisibility() {
+            this.hidden = !this.hidden;
         },
-        data() {
-            return {
-                hidden: true
-            };
-        },
-        methods: {
-            toggleVisibility() {
-                this.hidden = !this.hidden;
-            }
-        }
-    }
+    },
+};
 </script>
 
 <style scoped>
-    .input-wrapper {
-        display: flex;
-        align-items: center;
-        width: 100%;
-    }
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
 
-    .text-input {
-        padding: 8px;
-        margin: 8px;
-        width: 400px;
+.text-input {
+    padding: 8px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    width: 400px;
 
-        border: 2px solid #dddddd;
-        border-radius: 5px;
-        background-color: #eeeeee;
-    }
+    border: 2px solid var(--dark-gray);
+    border-radius: 5px;
+    background-color: var(--gray);
+}
 
-    .text-input:focus {
-        border: 2px solid #008de9;
-    }
+.text-input:focus {
+    border: 2px solid var(--dark-blue);
+}
 
-    .eye {
-        cursor: pointer;
-        margin-left: -40px;
-    }
+.eye {
+    cursor: pointer;
+    margin-left: -32px;
+}
+
+.disabled {
+    background-color: var(--dark-gray);
+}
 </style>

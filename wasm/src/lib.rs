@@ -6,8 +6,6 @@ pub mod neural;
 use wasm_bindgen::prelude::*;
 use serde::{Serialize, Deserialize};
 
-use layer::LayerData;
-use neural::NeuralNetwork;
 use matrix::Matrix;
 
 #[derive(Serialize, Deserialize)]

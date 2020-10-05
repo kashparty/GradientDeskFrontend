@@ -1,5 +1,4 @@
 use crate::matrix::Matrix;
-use crate::activation::*;
 use crate::layer::LayerData;
 use wasm_bindgen::prelude::*;
 use serde::{Serialize, Deserialize};
