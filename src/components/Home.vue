@@ -5,6 +5,12 @@
 <script>
 export default {
     name: "Home",
+    mounted() {
+        import("../../wasm/pkg").then((nn) => {
+            nn.initialise();
+            console.log(nn);
+        })
+    },
 };
 </script>
 
