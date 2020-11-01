@@ -7,7 +7,7 @@
             :checked="checked"
         />
         <span>
-            <i v-if="checked" class="material-icons no-select">check</i>
+            <i v-show="checked" class="material-icons no-select">check</i>
         </span>
     </label>
 </template>

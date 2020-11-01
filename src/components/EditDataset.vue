@@ -3,23 +3,77 @@
         <div class="workspace">
             <div class="settings">
                 <div class="page-title no-select">
-                    Prepare your "{{ datasetInfo.name }}" dataset
+                    Configure your "{{ datasetInfo.name }}" dataset
                 </div>
                 <div class="option-row">
                     Read column headings from file
-                    <TickBox v-model="readHeaders" @input="parseData" checked></TickBox>
+                    <CheckBox
+                        v-model="readHeaders"
+                        @input="parseData"
+                        checked
+                    ></CheckBox>
                 </div>
             </div>
             <div class="table-wrapper">
                 <table>
                     <tr>
                         <th v-for="(header, h) in headers" :key="h">
-                            {{ header }}
+                            <div class="header-option no-select">
+                                <div
+                                    class="header-name"
+                                    v-if="!isEditing(h)"
+                                    @click="toggleEdit(h)"
+                                >
+                                    {{ header }}
+                                </div>
+                                <div v-else>
+                                    <TextInput
+                                        v-on:enter="toggleEdit(h)"
+                                        placeholder="Enter to submit..."
+                                        v-model="headers[h]"
+                                        autofocus
+                                    ></TextInput>
+                                </div>
+                                <div>
+                                    <i
+                                        class="material-icons header-icon"
+                                        @click="hide(h)"
+                                        :title="
+                                            isHidden(h)
+                                                ? 'Column excluded'
+                                                : 'Column included'
+                                        "
+                                        >{{
+                                            isHidden(h)
+                                                ? "visibility_off"
+                                                : "visibility"
+                                        }}</i
+                                    >
+                                    <i
+                                        class="material-icons header-icon"
+                                        @click="makeNumeric(h)"
+                                        :title="
+                                            isNumeric(h)
+                                                ? 'Numeric column'
+                                                : 'Text column'
+                                        "
+                                        >{{
+                                            isNumeric(h)
+                                                ? "leaderboard"
+                                                : "text_snippet"
+                                        }}</i
+                                    >
+                                </div>
+                            </div>
                         </th>
                     </tr>
                     <tr v-for="r in rows" :key="r">
-                        <td v-for="(col, c) in parsedData" :key="c">
-                            {{ col[r - 1] }}
+                        <td
+                            v-for="(col, c) in parsedData"
+                            :class="{ hidden: isHidden(c) }"
+                            :key="c"
+                        >
+                            {{ isHidden(c) ? "" : col[r - 1] }}
                         </td>
                     </tr>
                 </table>
@@ -30,11 +84,13 @@
 
 <script>
 import firebase from "firebase/app";
-import TickBox from "./ui/CheckBox";
+import CheckBox from "./ui/CheckBox";
+import TextInput from "./ui/TextInput";
 export default {
     name: "EditDataset",
     components: {
-        TickBox
+        CheckBox,
+        TextInput,
     },
     data() {
         return {
@@ -44,6 +100,9 @@ export default {
             parsedData: [],
             rows: 0,
             readHeaders: true,
+            hiddenCols: [],
+            numericCols: [],
+            editingCol: -1,
         };
     },
     created() {
@@ -104,12 +163,12 @@ export default {
             let lines = this.rawData.split("\n");
             while (lines[lines.length - 1] == "") lines.pop();
 
-            this.rows = lines.length;
+            this.rows = Math.min(lines.length, 50);
             let cols = 0;
-            let firstValues = lines[0].split(delimiter);
+            let firstValues = lines[0].split(delimiter).map((v) => v.trim());
             for (let v = 0; v < firstValues.length; v++) {
                 parsedData.push([]);
-                this.headers.push(`Column ${v+1}`);
+                this.headers.push(`Column ${v + 1}`);
                 cols++;
             }
 
@@ -118,15 +177,53 @@ export default {
                 lines.shift();
             }
 
-            for (let l = 0; l < lines.length; l++) {
+            for (let l = 0; l < this.rows; l++) {
                 let values = lines[l].split(delimiter);
                 for (let v = 0; v < cols; v++) {
-                    parsedData[v].push(values[v]);
+                    parsedData[v].push(values[v].trim());
                 }
             }
+
             this.parsedData = parsedData;
-            this.dataLoaded = true;
         },
+        hide(colNumber) {
+            let index = this.hiddenCols.indexOf(colNumber);
+            if (index >= 0) {
+                // Column is already hidden, so un-hide it
+                this.hiddenCols.splice(index, 1);
+            } else {
+                this.hiddenCols.push(colNumber);
+            }
+        },
+        isHidden(colNumber) {
+            return this.hiddenCols.indexOf(colNumber) >= 0;
+        },
+        makeNumeric(colNumber) {
+            let index = this.numericCols.indexOf(colNumber);
+            if (index >= 0) {
+                // Column is already numeric, so revert it
+                this.numericCols.splice(index, 1);
+            } else {
+                this.numericCols.push(colNumber);
+            }
+        },
+        isNumeric(colNumber) {
+            return this.numericCols.indexOf(colNumber) >= 0;
+        },
+        isEditing(colNumber) {
+            return this.editingCol >= 0 && this.editingCol == colNumber;
+        },
+        toggleEdit(colNumber) {
+            if (this.editingCol == colNumber) {
+                this.editingCol = -1;
+                if (this.headers[colNumber] == "") {
+                    this.headers[colNumber] = `Column ${colNumber + 1}`;
+                }
+            }
+            else {
+                this.editingCol = colNumber;
+            }
+        }
     },
 };
 </script>
@@ -135,7 +232,6 @@ export default {
 <style scoped>
 .page {
     padding-top: 16px;
-    padding-bottom: 16px;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -150,6 +246,7 @@ export default {
 
 .workspace {
     display: flex;
+    flex-direction: column;
 }
 
 .settings {
@@ -157,7 +254,7 @@ export default {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-width: 40vw;
+    flex-shrink: 0;
 }
 
 .table-wrapper {
@@ -165,22 +262,24 @@ export default {
     height: 100%;
     width: 100%;
     display: flex;
-    justify-content: center;
 }
 
 table,
 tr,
 th,
 td {
-    border: 2px solid var(--gray);
+    flex-shrink: 0;
+    border: 2px solid var(--dark-gray);
     border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-th,
 td {
     padding: 8px;
-    min-width: 160px;
+    min-width: 200px;
     text-align: center;
+    background-color: #ffffff;
 }
 
 th {
@@ -188,7 +287,7 @@ th {
     top: 2px;
     background-color: var(--blue);
     box-shadow: 0 -3px 0 1px var(--blue);
-    color: #ffffff;
+    z-index: 10;
 }
 
 .option-row {
@@ -196,5 +295,34 @@ th {
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.header-option {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    padding-top: 8px;
+    padding-bottom: 8px;
+    width: 100%;
+    border-left: 2px solid var(--dark-blue);
+}
+
+.header-option * {
+    color: #ffffff;
+}
+
+.material-icons {
+    color: #ffffff;
+    margin-left: 8px;
+    cursor: pointer;
+}
+
+.hidden {
+    background-color: var(--gray);
+}
+
+.header-name {
+    cursor: pointer;
 }
 </style>

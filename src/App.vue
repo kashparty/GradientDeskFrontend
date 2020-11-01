@@ -5,7 +5,7 @@
             <router-view v-on:toast="makeToast" />
         </transition>
         <transition name="fade" mode="out-in">
-            <div class="toast-area" v-if="toasting">
+            <div class="toast-area" v-show="toasting">
                 <div class="toast">{{toast}}</div>
             </div>
         </transition>

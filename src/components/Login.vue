@@ -8,6 +8,7 @@
                     placeholder="Password"
                     password
                     v-model="password"
+                    v-on:enter="logIn"
                 ></TextInput>
             </div>
             <div class="login-buttons">
@@ -30,6 +31,7 @@
                     placeholder="Password"
                     password
                     v-model="password"
+                    v-on:enter="signUp"
                 ></TextInput>
             </div>
             <div class="signup-buttons">
@@ -147,6 +149,7 @@ export default {
 }
 
 .login-inputs {
+    width: 400px;
     display: flex;
     flex-direction: column;
 }

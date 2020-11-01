@@ -48,7 +48,7 @@ impl Matrix {
 
     pub fn fill_random(&mut self) {
         let mut rng = rand::thread_rng();
-        let distribution = rand::distributions::Uniform::from(-0.3..0.3);
+        let distribution = rand::distributions::StandardNormal;
         for r in 0..self.rows {
             for c in 0..self.cols {
                 self.data[r][c] = distribution.sample(&mut rng);

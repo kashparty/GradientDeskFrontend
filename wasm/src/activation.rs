@@ -7,6 +7,7 @@ pub enum Activation {
     ReLU,
     LeakyReLU,
     Sigmoid,
+    Linear
 }
 
 impl Activation {
@@ -16,6 +17,7 @@ impl Activation {
             Self::ReLU => ReLU::f(input),
             Self::LeakyReLU => LeakyReLU::f(input),
             Self::Sigmoid => Sigmoid::f(input),
+            Self::Linear => Linear::f(input),
         }
     }
 
@@ -25,6 +27,7 @@ impl Activation {
             Self::ReLU => ReLU::f_prime(input),
             Self::LeakyReLU => LeakyReLU::f_prime(input),
             Self::Sigmoid => Sigmoid::f_prime(input),
+            Self::Linear =>Linear::f_prime(input),
         }
     }
 }
@@ -82,5 +85,19 @@ impl Sigmoid {
 
     fn f_prime(input: &Matrix) -> Matrix {
         Sigmoid::f(input).element_wise_multiply((Sigmoid::f(input) * -1.0) + 1.0)
+    }
+}
+
+pub struct Linear {}
+
+impl Linear {
+    fn f(input: &Matrix) -> Matrix {
+        input.clone()
+    }
+
+    fn f_prime(input: &Matrix) -> Matrix {
+        let mut result = Matrix::new(input.rows(), input.cols());
+        result.fill(1);
+        result
     }
 }

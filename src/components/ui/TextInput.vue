@@ -7,9 +7,11 @@
             :disabled="disabled"
             v-model="value"
             @input="$emit('input', $event.target.value)"
+            v-on:keyup.enter="$emit('enter')"
+            ref="inputElement"
         />
         <i
-            v-if="password"
+            v-show="password"
             class="material-icons eye no-select"
             @click="toggleVisibility"
         >{{hidden ? "visibility" : "visibility_off"}}</i>
@@ -22,7 +24,11 @@ export default {
     props: {
         placeholder: String,
         password: Boolean,
-        disabled: Boolean
+        disabled: Boolean,
+        autofocus: Boolean
+    },
+    mounted() {
+        if (this.autofocus) this.$refs.inputElement.focus();
     },
     data() {
         return {
@@ -49,7 +55,7 @@ export default {
     padding: 8px;
     margin-top: 8px;
     margin-bottom: 8px;
-    width: 400px;
+    width: 95%;
 
     border: 2px solid var(--dark-gray);
     border-radius: 5px;

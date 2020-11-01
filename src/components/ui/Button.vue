@@ -1,7 +1,7 @@
 <template>
     <div v-bind:class="['button', 'no-select', {'highlight': highlight, 'loading': loading}]" @click="$emit('click')">
         <slot v-if="!loading"></slot>
-        <i v-if="loading" class="material-icons spinner no-select">hourglass_empty</i>
+        <i v-else class="material-icons spinner no-select">hourglass_empty</i>
     </div>
 </template>
 

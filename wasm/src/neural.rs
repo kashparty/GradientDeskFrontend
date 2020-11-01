@@ -79,7 +79,7 @@ impl NeuralNetwork {
             let output_matrix = &self.weights[l] * input_matrix;
             self.weighted_inputs.push(output_matrix.clone());
 
-            input_matrix = self.layers[l].activation.f(&output_matrix);
+            input_matrix = self.layers[l+1].activation.f(&output_matrix);
         }
         self.layer_outputs.push(input_matrix.clone());
     }

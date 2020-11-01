@@ -5,7 +5,7 @@
             <div class="title">Create a new dataset</div>
             <div class="help-text">
                 You can import a file from GitHub (recommended), or upload a
-                file from your computer (max size is 500KB).
+                file from your computer (max 500KB).
             </div>
             <TextInput placeholder="Dataset name" v-model="name"></TextInput>
             <TextInput
@@ -146,7 +146,7 @@ export default {
                 return;
             }
 
-            if (this.file.size > 500 * 1000) {
+            if (this.file.size > 5000) {
                 this.$emit(
                     "toast",
                     "Sorry, that file is too large. You can use GitHub for large files."
@@ -206,6 +206,7 @@ export default {
 }
 
 .form-box {
+    width: 400px;
     display: flex;
     flex-direction: column;
     align-items: center;
