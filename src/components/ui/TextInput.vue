@@ -5,10 +5,12 @@
             :class="['text-input', {'disabled': disabled}]"
             :placeholder="placeholder"
             :disabled="disabled"
-            v-model="value"
-            @input="$emit('input', $event.target.value)"
+            v-model.lazy="value"
+            @input="textChanged($event.target.value)"
             v-on:keyup.enter="$emit('enter')"
-            ref="inputElement"
+            ref="textInput"
+            :maxlength="maxlength"
+            :autocomplete="nocomplete ? 'new-password' : 'on'"
         />
         <i
             v-show="password"
@@ -22,24 +24,43 @@
 export default {
     name: "TextInput",
     props: {
+        initialValue: String,
         placeholder: String,
         password: Boolean,
         disabled: Boolean,
-        autofocus: Boolean
+        autofocus: Boolean,
+        maxlength: Number,
+        nocomplete: Boolean
+    },
+    beforeMount() {
+        if (this.initialValue != null) {
+            this.value = this.initialValue;
+        }
+    },
+    beforeUpdate() {
+        if (this.initialValue != null) {
+            this.value = this.initialValue;
+        }
     },
     mounted() {
-        if (this.autofocus) this.$refs.inputElement.focus();
+        if (this.autofocus) this.$refs.textInput.focus();
     },
     data() {
         return {
             hidden: true,
             value: "",
+            prevLength: 0
         };
     },
     methods: {
         toggleVisibility() {
             this.hidden = !this.hidden;
         },
+        textChanged(e) {
+            this.$emit('input', e);
+            if (e.length > this.prevLength) this.$refs.textInput.scrollLeft += 15;
+            this.prevLength = e.length;
+        }
     },
 };
 </script>

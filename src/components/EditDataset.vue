@@ -2,78 +2,112 @@
     <div class="page" v-if="datasetInfo">
         <div class="workspace">
             <div class="settings">
-                <div class="page-title no-select">
-                    Configure your "{{ datasetInfo.name }}" dataset
+                <!--Settings for whole table-->
+                <div class="column-settings" v-if="editColNum === null">
+                    <div class="option-row">
+                        Dataset name
+                        <TextInput
+                            v-model="datasetInfo.name"
+                            :placeholder="datasetInfo.name"
+                            :initialValue="datasetInfo.name"
+                            :maxlength="32"
+                        ></TextInput>
+                    </div>
+                    <div class="option-row">
+                        Dataset description
+                        <TextInput
+                            v-model="datasetInfo.description"
+                            :placeholder="datasetInfo.description"
+                            :initialValue="datasetInfo.description"
+                            :maxlength="128"
+                        ></TextInput>
+                    </div>
+                    <div class="option-row">
+                        Read column headings from file
+                        <CheckBox
+                            v-model="datasetInfo.readHeaders"
+                            @input="parseData"
+                            :checked="datasetInfo.readHeaders"
+                        ></CheckBox>
+                    </div>
+                    <div class="button-row">
+                        <div class="done-button">
+                            <Button @click="deleteDataset"
+                                >Delete dataset</Button
+                            >
+                        </div>
+                        <div class="done-button">
+                            <Button @click="editTableDone" highlight
+                                >Done editing</Button
+                            >
+                        </div>
+                    </div>
                 </div>
-                <div class="option-row">
-                    Read column headings from file
-                    <CheckBox
-                        v-model="readHeaders"
-                        @input="parseData"
-                        checked
-                    ></CheckBox>
+
+                <!--Column-specific settings, only shown when editing a column-->
+                <div v-else class="column-settings">
+                    <div class="option-row">
+                        Include column?
+                        <CheckBox
+                            v-model="editColInclude"
+                            @input="changeColInclude"
+                            :checked="editColInclude"
+                        ></CheckBox>
+                    </div>
+                    <div class="option-row">
+                        Column name
+                        <TextInput
+                            :placeholder="editColName"
+                            v-model="editColName"
+                            @input="changeColName"
+                            :maxlength="32"
+                            :initialValue="editColName"
+                        ></TextInput>
+                    </div>
+                    <div class="option-row">
+                        Data type
+                        <select @change="changeColType" v-model="editColType">
+                            <option value="text">Text</option>
+                            <option value="number">Number</option>
+                        </select>
+                    </div>
+                    <div class="done-button">
+                        <Button @click="editColDone" highlight>Done</Button>
+                    </div>
                 </div>
             </div>
             <div class="table-wrapper">
                 <table>
                     <tr>
-                        <th v-for="(header, h) in headers" :key="h">
-                            <div class="header-option no-select">
-                                <div
-                                    class="header-name"
-                                    v-if="!isEditing(h)"
-                                    @click="toggleEdit(h)"
+                        <!--Column headers, including edit icons-->
+                        <th v-for="(column, c) in columnData" :key="c">
+                            <div class="header-option">
+                                <i class="material-icons no-select">
+                                    {{
+                                        column.type == "number"
+                                            ? "scatter_plot"
+                                            : "notes"
+                                    }}
+                                </i>
+                                <div class="header-name">
+                                    {{ column.name }}
+                                </div>
+                                <i
+                                    class="material-icons no-select"
+                                    @click="editCol(c)"
+                                    >edit</i
                                 >
-                                    {{ header }}
-                                </div>
-                                <div v-else>
-                                    <TextInput
-                                        v-on:enter="toggleEdit(h)"
-                                        placeholder="Enter to submit..."
-                                        v-model="headers[h]"
-                                        autofocus
-                                    ></TextInput>
-                                </div>
-                                <div>
-                                    <i
-                                        class="material-icons header-icon"
-                                        @click="hide(h)"
-                                        :title="
-                                            isHidden(h)
-                                                ? 'Column excluded'
-                                                : 'Column included'
-                                        "
-                                        >{{
-                                            isHidden(h)
-                                                ? "visibility_off"
-                                                : "visibility"
-                                        }}</i
-                                    >
-                                    <i
-                                        class="material-icons header-icon"
-                                        @click="makeNumeric(h)"
-                                        :title="
-                                            isNumeric(h)
-                                                ? 'Numeric column'
-                                                : 'Text column'
-                                        "
-                                        >{{
-                                            isNumeric(h)
-                                                ? "leaderboard"
-                                                : "text_snippet"
-                                        }}</i
-                                    >
-                                </div>
                             </div>
                         </th>
                     </tr>
                     <tr v-for="r in rows" :key="r">
+                        <!--Actual column data. Note col[r - 1] is used since Vue for loops start at 1.-->
                         <td
                             v-for="(col, c) in parsedData"
-                            :class="{ hidden: isHidden(c) }"
+                            :class="{ hidden: !columnData[c].include }"
                             :key="c"
                         >
-                            {{ isHidden(c) ? "" : col[r - 1] }}
+                            {{ columnData[c].include ? col[r - 1] : "" }}
                         </td>
                     </tr>
                 </table>
@@ -85,24 +119,29 @@
 <script>
 import firebase from "firebase/app";
 import CheckBox from "./ui/CheckBox";
+import Button from "./ui/Button";
 import TextInput from "./ui/TextInput";
 export default {
     name: "EditDataset",
     components: {
         CheckBox,
+        Button,
         TextInput,
     },
     data() {
         return {
             datasetInfo: null,
             rawData: "",
-            headers: [],
+
+            columnData: [],
             parsedData: [],
             rows: 0,
-            readHeaders: true,
-            hiddenCols: [],
-            numericCols: [],
-            editingCol: -1,
+            updatingData: false,
+
+            editColNum: null,
+            editColName: null,
+            editColType: null,
+            editColInclude: true,
         };
     },
     created() {
@@ -131,52 +170,69 @@ export default {
                             this.$emit("toast", json.errors[0]);
                         } else {
                             this.datasetInfo = json.data;
-                            firebase
-                                .storage()
-                                .ref()
-                                .child(json.data.url)
-                                .getDownloadURL()
-                                .then((url) => {
-                                    fetch(url).then((response) => {
-                                        response.text().then((data) => {
-                                            this.rawData = data;
-                                            this.parseData();
-                                        });
+                            if (json.data.url.startsWith("https://")) {
+                                fetch(json.data.url).then((response) => {
+                                    response.text().then((data) => {
+                                        this.rawData = data;
+                                        this.parseData();
                                     });
                                 });
+                            } else {
+                                firebase
+                                    .storage()
+                                    .ref()
+                                    .child(json.data.url)
+                                    .getDownloadURL()
+                                    .then((url) => {
+                                        fetch(url).then((response) => {
+                                            response.text().then((data) => {
+                                                this.rawData = data;
+                                                this.parseData();
+                                            });
+                                        });
+                                    });
+                            }
                         }
                     });
                 }
             });
         },
         parseData() {
-            this.headers = [];
+            // Headers are the column names, parsedData is the data itself
+            let headers = [];
             let parsedData = [];
 
-            let delimiter = null;
+            let delimiter = "";
             if (this.datasetInfo.filetype == "csv") {
                 delimiter = ",";
-            } else if (this.datasetInfo.filetype == "tsv") {
+            } else {
                 delimiter = "\t";
             }
 
             let lines = this.rawData.split("\n");
+
+            // Remove blank lines at the end of the file
             while (lines[lines.length - 1] == "") lines.pop();
 
+            // Limit number of loaded rows to prevent slowing down page
             this.rows = Math.min(lines.length, 50);
+
+            // Read first row of data to determine number of columns and to set up data array
             let cols = 0;
             let firstValues = lines[0].split(delimiter).map((v) => v.trim());
             for (let v = 0; v < firstValues.length; v++) {
                 parsedData.push([]);
-                this.headers.push(`Column ${v + 1}`);
+                headers.push(`Column ${v + 1}`);
                 cols++;
             }
 
-            if (this.readHeaders) {
-                this.headers = firstValues;
+            // If reading headers from file, remove first row row and use those values as header names
+            if (this.datasetInfo.readHeaders) {
+                headers = firstValues;
                 lines.shift();
             }
 
+            // Read the rest of the data up to the maximum defined previously
             for (let l = 0; l < this.rows; l++) {
                 let values = lines[l].split(delimiter);
                 for (let v = 0; v < cols; v++) {
@@ -184,46 +240,113 @@ export default {
                 }
             }
 
-            this.parsedData = parsedData;
-        },
-        hide(colNumber) {
-            let index = this.hiddenCols.indexOf(colNumber);
-            if (index >= 0) {
-                // Column is already hidden, so un-hide it
-                this.hiddenCols.splice(index, 1);
+            // Fetch (or create) the column configurations
+            if (this.columnData.length == 0) {
+                fetch(
+                    `https://localhost:5001/dataset/${this.$route.params.id}/columns`,
+                    {
+                        headers: {
+                            Authorization: this.$store.state.jwt,
+                        },
+                    }
+                ).then((response) => {
+                    if (response.ok) {
+                        response.json().then((json) => {
+                            if (json.errors && json.errors.length != 0) {
+                                this.$emit("toast", json.errors[0]);
+                            } else {
+                                if (json.data.length > 0) {
+                                    this.columnData = json.data;
+
+                                    // Used later to ensure that we update columns rather than create them
+                                    this.updatingData = true;
+                                }
+                            }
+                        });
+                    }
+                });
+
+                // If the length is still 0 then the columns are not in the database, so create them
+                if (this.columnData.length == 0) {
+                    for (let h = 0; h < headers.length; h++) {
+                        this.columnData.push({
+                            datasetId: this.datasetInfo.datasetId,
+                            name: headers[h],
+                            type: "text",
+                            include: true,
+                            index: h,
+                        });
+                    }
+                }
             } else {
-                this.hiddenCols.push(colNumber);
-            }
-        },
-        isHidden(colNumber) {
-            return this.hiddenCols.indexOf(colNumber) >= 0;
-        },
-        makeNumeric(colNumber) {
-            let index = this.numericCols.indexOf(colNumber);
-            if (index >= 0) {
-                // Column is already numeric, so revert it
-                this.numericCols.splice(index, 1);
-            } else {
-                this.numericCols.push(colNumber);
-            }
-        },
-        isNumeric(colNumber) {
-            return this.numericCols.indexOf(colNumber) >= 0;
-        },
-        isEditing(colNumber) {
-            return this.editingCol >= 0 && this.editingCol == colNumber;
-        },
-        toggleEdit(colNumber) {
-            if (this.editingCol == colNumber) {
-                this.editingCol = -1;
-                if (this.headers[colNumber] == "") {
-                    this.headers[colNumber] = `Column ${colNumber + 1}`;
+                // Don't add more columns, change existing columns
+                for (let h = 0; h < headers.length; h++) {
+                    this.columnData[h].name = headers[h];
                 }
             }
-            else {
-                this.editingCol = colNumber;
-            }
-        }
+            this.parsedData = parsedData;
+        },
+        editCol(colNumber) {
+            let columnData = this.columnData[colNumber];
+            this.editColName = columnData.name;
+            this.editColType = columnData.type;
+            this.editColInclude = columnData.include;
+            this.editColNum = colNumber;
+        },
+        editColDone() {
+            this.editColNum = null;
+            this.editColName = "";
+            this.editColType = "";
+            this.editColInclude = "";
+        },
+        changeColInclude() {
+            this.columnData[this.editColNum].include = this.editColInclude;
+        },
+        changeColName() {
+            this.columnData[this.editColNum].name = this.editColName;
+        },
+        changeColType() {
+            this.columnData[this.editColNum].type = this.editColType;
+        },
+        editTableDone() {
+            fetch("https://localhost:5001/dataset", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: this.$store.state.jwt,
+                },
+                body: JSON.stringify(this.datasetInfo),
+            });
+            fetch(`https://localhost:5001/dataset/columns`, {
+                method: this.updatingData ? "PUT" : "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: this.$store.state.jwt,
+                },
+                body: JSON.stringify({
+                    data: this.columnData,
+                }),
+            });
+            this.$router.push("/datasets");
+        },
+        deleteDataset() {
+            fetch(`https://localhost:5001/dataset/${this.$route.params.id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: this.$store.state.jwt,
+                },
+            }).then((response) => {
+                if (response.ok) {
+                    response.json().then((json) => {
+                        if (json.errors && json.errors.length != 0) {
+                            this.$emit("toast", json.errors[0]);
+                        } else {
+                            this.$router.push("/datasets");
+                        }
+                    });
+                }
+            });
+        },
     },
 };
 </script>
@@ -291,15 +414,25 @@ th {
 }
 
 .option-row {
-    padding: 8px;
+    padding-bottom: 8px;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
+.option-row * {
+    max-width: 60%;
+}
+
+.done-button {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 8px;
+}
+
 .header-option {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
 
     padding-top: 8px;
@@ -314,7 +447,8 @@ th {
 
 .material-icons {
     color: #ffffff;
-    margin-left: 8px;
+    margin-left: 16px;
+    margin-right: 16px;
     cursor: pointer;
 }
 
@@ -322,7 +456,13 @@ th {
     background-color: var(--gray);
 }
 
-.header-name {
-    cursor: pointer;
+.column-settings {
+    width: 30%;
+}
+
+.button-row {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
 }
 </style>

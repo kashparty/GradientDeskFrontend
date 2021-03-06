@@ -4,10 +4,10 @@
             type="checkbox"
             v-model="value"
             @change="$emit('input', $event.target.checked)"
-            :checked="checked"
+            :checked="value"
         />
         <span>
-            <i v-show="checked" class="material-icons no-select">check</i>
+            <i v-show="value" class="material-icons no-select">check</i>
         </span>
     </label>
 </template>
@@ -19,6 +19,9 @@ export default {
         checked: Boolean,
     },
     beforeMount() {
+        this.value = this.checked;
+    },
+    beforeUpdate() {
         this.value = this.checked;
     },
     data() {
@@ -40,6 +43,7 @@ span {
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 }
 
 span:hover {

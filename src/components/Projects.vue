@@ -1,14 +1,7 @@
 <template>
     <div class="page">
-        <div class="page-title no-select">
-            {{
-                projectData.length > 0
-                    ? "Your projects"
-                    : "Add your first project"
-            }}
-        </div>
         <div class="projects-list">
-            <div class="new-project">
+            <div class="new-project" @click="newProject">
                 <i class="material-icons add-icon no-select">add</i>
                 <div class="no-select">New project</div>
             </div>
@@ -18,15 +11,27 @@
                 class="project-card"
             >
                 <div class="project-name no-select">{{ project.name }}</div>
-                <div class="no-select">{{ project.datasetId }}</div>
+                <div class="no-select">{{ project.description }}</div>
+                <div class="button-row">
+                    <Button class="project-button" @click="edit(project.projectId)">
+                        <i class="material-icons">edit</i>
+                    </Button>
+                    <Button class="project-button" @click="view(project.projectId)">
+                        <i class="material-icons">visibility</i>
+                    </Button>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import Button from "./ui/Button";
 export default {
     name: "Projects",
+    components: {
+        Button
+    },
     data() {
         return {
             projectData: [],
@@ -54,6 +59,17 @@ export default {
                 });
             }
         });
+    },
+    methods: {
+        newProject() {
+            this.$router.push("/projects/new");
+        },
+        edit(projectId) {
+            this.$router.push(`/projects/edit/${projectId}`);
+        },
+        view(projectId) {
+            this.$router.push(`/projects/view/${projectId}`)
+        }
     },
 };
 </script>
@@ -83,6 +99,8 @@ export default {
     font-size: var(--medium-font);
     font-variation-settings: "wght" 600;
     cursor: pointer;
+    margin-top: 8px;
+    margin-bottom: 8px;
 }
 
 .project-card {
@@ -94,15 +112,12 @@ export default {
 
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: space-around;
     align-items: center;
-    cursor: pointer;
 
     margin: 8px;
-}
-
-.project-card:hover {
-    border-color: var(--dark-blue);
+    padding-left: 16px;
+    padding-right: 16px;
 }
 
 .new-project {
@@ -118,6 +133,9 @@ export default {
     align-items: center;
     flex-direction: column;
     cursor: pointer;
+
+    padding-left: 16px;
+    padding-right: 16px;
 }
 
 .new-project:hover {
@@ -130,5 +148,16 @@ export default {
 
 .add-icon {
     font-size: 48px;
+}
+
+.button-row {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.project-button {
+    margin-left: 8px;
+    margin-right: 8px;
 }
 </style>

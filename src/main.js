@@ -1,5 +1,4 @@
 import Vue from "vue";
-import Chartist from "vue-chartist";
 import * as firebase from "firebase/app";
 import "firebase/storage";
 
@@ -8,8 +7,6 @@ import store from "./store.js";
 import App from "./App.vue";
 
 Vue.config.productionTip = false;
-
-Vue.use(Chartist);
 
 var firebaseConfig = {
     apiKey: "AIzaSyDNYZX_z732cv3sY5nxVLSUjchjHYp28qw",

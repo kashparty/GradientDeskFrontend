@@ -6,7 +6,7 @@
         </transition>
         <transition name="fade" mode="out-in">
             <div class="toast-area" v-show="toasting">
-                <div class="toast">{{toast}}</div>
+                <div class="toast">{{ toast }}</div>
             </div>
         </transition>
     </div>
@@ -22,8 +22,8 @@ export default {
     data() {
         return {
             toasting: false,
-            toast: ""
-        }
+            toast: "",
+        };
     },
     methods: {
         makeToast(message) {
@@ -34,8 +34,15 @@ export default {
                 this.toasting = false;
                 this.toast = "";
             }, 5000);
-        }
-    }
+        },
+    },
+    watch: {
+        $route(to) {
+            document.title = to.meta.title
+                ? `GradientDesk - ${to.meta.title}`
+                : "GradientDesk";
+        },
+    },
 };
 </script>
 
@@ -83,6 +90,7 @@ export default {
     --dark-gray: #dddddd;
     --medium-font: 20px;
     --big-font: 32px;
+    font-size: var(--medium-font);
 }
 
 * {
@@ -114,6 +122,7 @@ body,
 #app {
     height: 100vh;
     width: 100vw;
+    overflow: hidden;
 }
 
 #app {
@@ -138,14 +147,14 @@ body,
     width: 100%;
     display: flex;
     justify-content: flex-end;
-    align-items: center;   
+    align-items: center;
 }
 
 .toast {
     position: absolute;
     right: 10px;
     bottom: 10px;
-    
+
     border: 2px solid #d33300;
     background-color: #ff3d00;
     color: #ffffff;

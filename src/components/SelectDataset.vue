@@ -1,29 +1,35 @@
 <template>
     <div class="page">
-        <!-- <div class="page-title no-select">
-            {{
-                datasetData.length > 0
-                    ? "Your datasets"
-                    : "Add your first dataset"
-            }}
-        </div> -->
-        <div class="datasets-list">
-            <div class="new-dataset" @click="newDataset">
-                <i class="material-icons add-icon no-select">add</i>
-                <div class="no-select">New dataset</div>
+        <div class="search-container">
+            <div class="search">
+                <TextInput
+                    v-model="searchQuery"
+                    @input="updateSearch"
+                    placeholder="Search datasets..."
+                ></TextInput>
             </div>
+        </div>
+        <div class="datasets-list">
             <div
-                v-for="dataset in datasetData"
+                v-for="dataset in filteredDatasets"
                 :key="dataset.datasetId"
                 class="dataset-card"
             >
                 <div class="dataset-name no-select">{{ dataset.name }}</div>
                 <div class="no-select">{{ dataset.description }}</div>
                 <div class="button-row">
-                    <Button class="dataset-button" @click="edit(dataset.datasetId)">
-                        <i class="material-icons">edit</i>
+                    <Button
+                        title="Select this dataset"
+                        class="dataset-button"
+                        @click="select(dataset.datasetId)"
+                    >
+                        <i class="material-icons">library_add_check</i>
                     </Button>
-                    <Button class="dataset-button" @click="view(dataset.datasetId)">
+                    <Button
+                        title="View this dataset"
+                        class="dataset-button"
+                        @click="view(dataset.datasetId)"
+                    >
                         <i class="material-icons">visibility</i>
                     </Button>
                 </div>
@@ -33,19 +39,26 @@
 </template>
 
 <script>
-import Button from "./ui/Button"; 
+import Button from "./ui/Button";
+import TextInput from "./ui/TextInput";
 export default {
-    name: "Datasets",
+    name: "SelectDataset",
     components: {
-        Button
+        Button,
+        TextInput,
     },
     data() {
         return {
             datasetData: [],
+            filteredDatasets: [],
+            searchQuery: "",
         };
     },
     beforeCreate() {
-        this.$store.commit("redirect", "/datasets");
+        this.$store.commit(
+            "redirect",
+            `/datasets/select/${this.$route.params.id}`
+        );
         if (!this.$store.state.authorized) {
             this.$router.replace("/login");
             return;
@@ -62,21 +75,41 @@ export default {
                         this.$router.replace("/login");
                     } else {
                         this.datasetData = json.data;
+                        this.filteredDatasets = this.datasetData;
                     }
                 });
             }
         });
     },
     methods: {
-        newDataset() {
-            this.$router.push("/datasets/new");
-        },
-        edit(datasetId) {
-            this.$router.push(`/datasets/edit/${datasetId}`);
+        select(datasetId) {
+            this.$router.push(
+                `/datasets/prepare/${this.$route.params.id}/${datasetId}`
+            );
         },
         view(datasetId) {
-            this.$router.push(`/datasets/view/${datasetId}`)
-        }
+            this.$router.push(`/datasets/view/${datasetId}`);
+        },
+        updateSearch() {
+            this.filteredDatasets = this.datasetData;
+            if (this.searchQuery.length > 0) {
+                this.filteredDatasets = this.datasetData.filter((dataset) => {
+                    if (
+                        dataset.name
+                            .toLowerCase()
+                            .includes(this.searchQuery.toLowerCase())
+                    )
+                        return true;
+                    if (
+                        dataset.description
+                            .toLowerCase()
+                            .includes(this.searchQuery.toLowerCase())
+                    )
+                        return true;
+                    return false;
+                });
+            }
+        },
     },
 };
 </script>
@@ -86,6 +119,11 @@ export default {
 .page {
     padding: 16px;
     height: 100%;
+}
+
+.search-container {
+    display: flex;
+    justify-content: center;
 }
 
 .datasets-list {
@@ -127,36 +165,6 @@ export default {
     padding-right: 16px;
 }
 
-.new-dataset {
-    width: 400px;
-    height: 200px;
-    background-color: var(--gray);
-    border: 2px solid var(--dark-gray);
-    border-radius: 5px;
-    margin: 8px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    cursor: pointer;
-
-    padding-left: 16px;
-    padding-right: 16px;
-}
-
-.new-dataset:hover {
-    border-color: var(--dark-blue);
-}
-
-.new-dataset:hover .add-icon {
-    color: var(--dark-blue);
-}
-
-.add-icon {
-    font-size: 48px;
-}
-
 .button-row {
     width: 100%;
     display: flex;
@@ -167,5 +175,4 @@ export default {
     margin-left: 8px;
     margin-right: 8px;
 }
-
 </style>

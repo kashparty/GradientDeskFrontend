@@ -1,43 +1,45 @@
 <template>
     <div class="page">
-        <div class="login-box">
-            <div class="login-title no-select">Log in</div>
-            <div class="login-inputs">
-                <TextInput placeholder="Email" v-model="email"></TextInput>
-                <TextInput
-                    placeholder="Password"
-                    password
-                    v-model="password"
-                    v-on:enter="logIn"
-                ></TextInput>
+        <div class="page-inner">
+            <div class="login-box">
+                <div class="login-title no-select">Log in</div>
+                <div class="login-inputs">
+                    <TextInput placeholder="Email" v-model="email"></TextInput>
+                    <TextInput
+                        placeholder="Password"
+                        password
+                        v-model="password"
+                        v-on:enter="logIn"
+                    ></TextInput>
+                </div>
+                <div class="login-buttons">
+                    <Button @click="forgotPassword">Forgot password</Button>
+                    <Button @click="logIn" :loading="loggingIn" highlight
+                        >Log in</Button
+                    >
+                </div>
             </div>
-            <div class="login-buttons">
-                <Button>Forgot password</Button>
-                <Button @click="logIn" :loading="loggingIn" highlight
-                    >Log in</Button
-                >
-            </div>
-        </div>
-        <div class="login-title no-select">or</div>
-        <div class="login-box">
-            <div class="login-title no-select">Sign up</div>
-            <div class="login-inputs">
-                <TextInput
-                    placeholder="Username"
-                    v-model="username"
-                ></TextInput>
-                <TextInput placeholder="Email" v-model="email"></TextInput>
-                <TextInput
-                    placeholder="Password"
-                    password
-                    v-model="password"
-                    v-on:enter="signUp"
-                ></TextInput>
-            </div>
-            <div class="signup-buttons">
-                <Button @click="signUp" :loading="signingUp" highlight
-                    >Sign up</Button
-                >
+            <div class="login-title login-or no-select">or</div>
+            <div class="login-box">
+                <div class="login-title no-select">Sign up</div>
+                <div class="login-inputs">
+                    <TextInput
+                        placeholder="Username"
+                        v-model="username"
+                    ></TextInput>
+                    <TextInput placeholder="Email" v-model="email"></TextInput>
+                    <TextInput
+                        placeholder="Password"
+                        password
+                        v-model="password"
+                        v-on:enter="signUp"
+                    ></TextInput>
+                </div>
+                <div class="signup-buttons">
+                    <Button @click="signUp" :loading="signingUp" highlight
+                        >Sign up</Button
+                    >
+                </div>
             </div>
         </div>
     </div>
@@ -122,6 +124,27 @@ export default {
                 this.signingUp = false;
             });
         },
+        forgotPassword() {
+            if (this.email.length != 0) {
+                fetch("https://localhost:5001/user/resetpassword", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email: this.email
+                    }),
+                }).then((response) => {
+                    if (response.ok) {
+                        response.json().then((json) => {
+                            if (json.errors && json.errors.length != 0) {
+                                this.$emit("toast", json.errors.join(", "));
+                            }
+                        });
+                    }
+                })
+            }
+        },
     },
 };
 </script>
@@ -131,8 +154,14 @@ export default {
     padding: 16px;
     height: 100%;
     display: flex;
-    justify-content: space-evenly;
+    justify-content: center;
     align-items: center;
+}
+
+.page-inner {
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
 }
 
 .login-box {
@@ -146,6 +175,10 @@ export default {
     font-variation-settings: "wght" 600;
     margin-bottom: 24px;
     cursor: default;
+}
+
+.login-or {
+    align-self: center;
 }
 
 .login-inputs {

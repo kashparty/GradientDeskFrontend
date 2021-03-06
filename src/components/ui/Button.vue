@@ -1,5 +1,5 @@
 <template>
-    <div v-bind:class="['button', 'no-select', {'highlight': highlight, 'loading': loading}]" @click="$emit('click')">
+    <div v-bind:class="['button', 'no-select', {'highlight': highlight, 'loading': loading, 'disabled': disabled}]" @click="clicked">
         <slot v-if="!loading"></slot>
         <i v-else class="material-icons spinner no-select">hourglass_empty</i>
     </div>
@@ -10,8 +10,16 @@ export default {
     name: "Button",
     props: {
         highlight: Boolean,
-        loading: Boolean
+        loading: Boolean,
+        disabled: Boolean
     },
+    methods: {
+        clicked() {
+            if (!this.disabled) {
+                this.$emit('click');
+            }
+        }
+    }
 };
 </script>
 
@@ -49,6 +57,12 @@ export default {
     cursor: default;
     background-color: transparent;
     border-color: var(--blue);
+}
+
+.disabled {
+    cursor: default;
+    background-color: var(--gray);
+    border-color: var(--gray);
 }
 
 .spinner {

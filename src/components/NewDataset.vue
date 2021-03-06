@@ -2,7 +2,6 @@
     <div class="page">
         <input type="file" id="file-input" accept=".csv, .tsv" />
         <div class="form-box">
-            <div class="title">Create a new dataset</div>
             <div class="help-text">
                 You can import a file from GitHub (recommended), or upload a
                 file from your computer (max 500KB).
@@ -99,7 +98,7 @@ export default {
                             console.log(json.errors);
                             this.$emit("toast", json.errors.join(", "));
                         } else {
-                            this.$router.push(`datasets/edit/${json.data}`);
+                            this.$router.push(`/datasets/edit/${json.data}`);
                         }
                     });
                 }
@@ -146,7 +145,7 @@ export default {
                 return;
             }
 
-            if (this.file.size > 5000) {
+            if (this.file.size > 500 * 1000) {
                 this.$emit(
                     "toast",
                     "Sorry, that file is too large. You can use GitHub for large files."

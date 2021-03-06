@@ -1,4 +1,5 @@
-use rand::distributions::Distribution;
+use rand::prelude::*;
+use rand_distr::StandardNormal;
 use std::{fmt, ops};
 use serde::{Serialize, Deserialize};
 
@@ -48,10 +49,9 @@ impl Matrix {
 
     pub fn fill_random(&mut self) {
         let mut rng = rand::thread_rng();
-        let distribution = rand::distributions::StandardNormal;
         for r in 0..self.rows {
             for c in 0..self.cols {
-                self.data[r][c] = distribution.sample(&mut rng);
+                self.data[r][c] = rng.sample(StandardNormal);
             }
         }
     }
