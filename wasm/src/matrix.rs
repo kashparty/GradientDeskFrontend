@@ -414,3 +414,23 @@ impl<T: Into<f64> + Copy> From<Vec<Vec<T>>> for Matrix {
         result
     }
 }
+
+impl<T: Into<f64> + Copy> From<&Vec<Vec<T>>> for Matrix {
+    fn from(vec: &Vec<Vec<T>>) -> Matrix {
+        let first_size = vec[0].len();
+        for i in 1..vec.len() {
+            if vec[i].len() != first_size {
+                panic!("Matrix rows must all be same length");
+            }
+        }
+        let mut result = Matrix::new(vec.len(), first_size);
+
+        for r in 0..result.rows {
+            for c in 0..result.cols {
+                result.data[r][c] = vec[r][c].into();
+            }
+        }
+
+        result
+    }
+}

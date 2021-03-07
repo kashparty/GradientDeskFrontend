@@ -58,7 +58,7 @@ export default {
                 // Nothing is changed, so no need to send a request.
                 return;
             }
-            fetch("https://localhost:5001/user/edituser", {
+            fetch("https://nnvis.herokuapp.com/user/edituser", {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -82,7 +82,7 @@ export default {
             this.$router.push("/");
         },
         deleteAccount() {
-            fetch("https://localhost:5001/user", {
+            fetch("https://nnvis.herokuapp.com/user", {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",

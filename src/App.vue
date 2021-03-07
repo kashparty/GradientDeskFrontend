@@ -19,6 +19,9 @@ export default {
     components: {
         Header,
     },
+    beforeCreate() {
+		this.$store.commit('initialiseStore');
+	},
     data() {
         return {
             toasting: false,

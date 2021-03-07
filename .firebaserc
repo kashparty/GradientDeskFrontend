@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "neuralvis"
+  },
+  "targets": {
+    "neuralvis": {
+      "hosting": {
+        "gradientdesk": [
+          "gradientdesk"
+        ]
+      }
+    }
   }
 }

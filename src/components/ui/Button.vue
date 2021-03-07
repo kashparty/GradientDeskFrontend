@@ -49,6 +49,10 @@ export default {
     font-variation-settings: "wght" 500;
 }
 
+.highlight * {
+    color: #ffffff;
+}
+
 .highlight:not(.loading):hover {
     background-color: var(--dark-blue);
 }

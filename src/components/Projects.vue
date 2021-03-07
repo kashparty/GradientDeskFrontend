@@ -44,7 +44,7 @@ export default {
             return;
         }
 
-        fetch("https://localhost:5001/project/all", {
+        fetch("https://nnvis.herokuapp.com/project/all", {
             headers: {
                 Authorization: this.$store.state.jwt,
             },

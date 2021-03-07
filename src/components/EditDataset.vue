@@ -159,7 +159,7 @@ export default {
     },
     methods: {
         getData() {
-            fetch(`https://localhost:5001/dataset/${this.$route.params.id}`, {
+            fetch(`https://nnvis.herokuapp.com/dataset/${this.$route.params.id}`, {
                 headers: {
                     Authorization: this.$store.state.jwt,
                 },
@@ -243,7 +243,7 @@ export default {
             // Fetch (or create) the column configurations
             if (this.columnData.length == 0) {
                 fetch(
-                    `https://localhost:5001/dataset/${this.$route.params.id}/columns`,
+                    `https://nnvis.herokuapp.com/dataset/${this.$route.params.id}/columns`,
                     {
                         headers: {
                             Authorization: this.$store.state.jwt,
@@ -261,23 +261,24 @@ export default {
                                     // Used later to ensure that we update columns rather than create them
                                     this.updatingData = true;
                                 }
+
+                                // If the length is still 0 then the columns are not in the database, so create them
+                                if (this.columnData.length == 0) {
+                                    for (let h = 0; h < headers.length; h++) {
+                                        this.columnData.push({
+                                            datasetId: this.datasetInfo
+                                                .datasetId,
+                                            name: headers[h],
+                                            type: "text",
+                                            include: true,
+                                            index: h,
+                                        });
+                                    }
+                                }
                             }
                         });
                     }
                 });
-
-                // If the length is still 0 then the columns are not in the database, so create them
-                if (this.columnData.length == 0) {
-                    for (let h = 0; h < headers.length; h++) {
-                        this.columnData.push({
-                            datasetId: this.datasetInfo.datasetId,
-                            name: headers[h],
-                            type: "text",
-                            include: true,
-                            index: h,
-                        });
-                    }
-                }
             } else {
                 // Don't add more columns, change existing columns
                 for (let h = 0; h < headers.length; h++) {
@@ -309,7 +310,7 @@ export default {
             this.columnData[this.editColNum].type = this.editColType;
         },
         editTableDone() {
-            fetch("https://localhost:5001/dataset", {
+            fetch("https://nnvis.herokuapp.com/dataset", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -317,7 +318,7 @@ export default {
                 },
                 body: JSON.stringify(this.datasetInfo),
             });
-            fetch(`https://localhost:5001/dataset/columns`, {
+            fetch(`https://nnvis.herokuapp.com/dataset/columns`, {
                 method: this.updatingData ? "PUT" : "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -330,7 +331,7 @@ export default {
             this.$router.push("/datasets");
         },
         deleteDataset() {
-            fetch(`https://localhost:5001/dataset/${this.$route.params.id}`, {
+            fetch(`https://nnvis.herokuapp.com/dataset/${this.$route.params.id}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: this.$store.state.jwt,

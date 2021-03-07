@@ -42,7 +42,7 @@ export default {
     },
     methods: {
         submit() {
-            fetch("https://localhost:5001/project", {
+            fetch("https://nnvis.herokuapp.com/project", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

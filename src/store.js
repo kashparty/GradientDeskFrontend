@@ -12,6 +12,13 @@ export default new Vuex.Store({
         redirectedFrom: "/projects"
     },
     mutations: {
+        initialiseStore(state) {
+            if(localStorage.getItem('store')) {
+				this.replaceState(
+					Object.assign(state, JSON.parse(localStorage.getItem('store')))
+				);
+			}
+        },
         authorize(state, data) {
             state.jwt = data.jwt;
             state.username = data.username;

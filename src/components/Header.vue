@@ -11,7 +11,7 @@
                 to="/projects"
                 v-bind:class="[
                     'link',
-                    { current: this.$route.path === '/projects' },
+                    { current: this.$route.path.includes('/projects') },
                 ]"
                 >Projects</router-link
             >
@@ -19,7 +19,7 @@
                 to="/datasets"
                 v-bind:class="[
                     'link',
-                    { current: this.$route.path === '/datasets' },
+                    { current: this.$route.path.includes('/datasets') },
                 ]"
                 >Datasets</router-link
             >
@@ -27,7 +27,7 @@
                 to="/account"
                 v-bind:class="[
                     'link',
-                    { current: this.$route.path === '/account' },
+                    { current: this.$route.path.includes('/account') },
                 ]"
                 >Account</router-link
             >

@@ -86,6 +86,7 @@
                                 (c) => c.include
                             )"
                             :key="c"
+                            :class="{ used: dataprepInfo[col.index].usage != 'unused' }"
                         >
                             <div class="header-option">
                                 <i class="material-icons no-select">
@@ -167,7 +168,7 @@ export default {
     methods: {
         getData() {
             fetch(
-                `https://localhost:5001/dataset/${this.$route.params.datasetId}`,
+                `https://nnvis.herokuapp.com/dataset/${this.$route.params.datasetId}`,
                 {
                     headers: {
                         Authorization: this.$store.state.jwt,
@@ -208,7 +209,7 @@ export default {
             });
 
             fetch(
-                `https://localhost:5001/project/${this.$route.params.projectId}`,
+                `https://nnvis.herokuapp.com/project/${this.$route.params.projectId}`,
                 {
                     headers: {
                         Authorization: this.$store.state.jwt,
@@ -228,7 +229,7 @@ export default {
         },
         parseData() {
             fetch(
-                `https://localhost:5001/dataset/${this.$route.params.datasetId}/columns`,
+                `https://nnvis.herokuapp.com/dataset/${this.$route.params.datasetId}/columns`,
                 {
                     headers: {
                         Authorization: this.$store.state.jwt,
@@ -290,7 +291,7 @@ export default {
         },
         getDataPreps() {
             fetch(
-                `https://localhost:5001/project/${this.$route.params.projectId}/dataprep`,
+                `https://nnvis.herokuapp.com/project/${this.$route.params.projectId}/dataprep`,
                 {
                     headers: {
                         Authorization: this.$store.state.jwt,
@@ -338,7 +339,7 @@ export default {
 
             console.log(this.dataprepInfo);
 
-            fetch("https://localhost:5001/project", {
+            fetch("https://nnvis.herokuapp.com/project", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -346,7 +347,7 @@ export default {
                 },
                 body: JSON.stringify(this.projectInfo),
             });
-            fetch(`https://localhost:5001/project/dataprep`, {
+            fetch(`https://nnvis.herokuapp.com/project/dataprep`, {
                 method: this.updatingPreps ? "PUT" : "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -423,9 +424,14 @@ td {
 th {
     position: sticky;
     top: 2px;
+    background-color: #888888;
+    box-shadow: 0 -3px 0 1px #888888;
+    z-index: 10;
+}
+
+th.used {
     background-color: var(--blue);
     box-shadow: 0 -3px 0 1px var(--blue);
-    z-index: 10;
 }
 
 .option-row {
@@ -453,7 +459,7 @@ th {
     padding-top: 8px;
     padding-bottom: 8px;
     width: 100%;
-    border-left: 2px solid var(--dark-blue);
+    border-left: 2px solid #888888;
 }
 
 .header-option * {

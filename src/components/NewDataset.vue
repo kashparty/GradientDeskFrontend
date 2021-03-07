@@ -79,7 +79,7 @@ export default {
                 return;
             }
 
-            fetch("https://localhost:5001/dataset", {
+            fetch("https://nnvis.herokuapp.com/dataset", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -157,7 +157,7 @@ export default {
 
             let firebaseRef = firebase.storage().ref().child(randomString);
             firebaseRef.put(this.file).then(() => {
-                fetch("https://localhost:5001/dataset", {
+                fetch("https://nnvis.herokuapp.com/dataset", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

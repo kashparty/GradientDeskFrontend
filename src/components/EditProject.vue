@@ -94,6 +94,7 @@
                             <option value="rmse">
                                 Root Mean Squared Error
                             </option>
+                            <!-- <option value="cross">Categorical cross-entropy</option> -->
                         </select>
                     </div>
                     <div
@@ -194,7 +195,7 @@
                     </div>
                 </div>
                 <div class="layer-settings" v-else>
-                    <div class="option-row">
+                    <div class="option-row" v-if="editingLayer < layerInfo.length">
                         Number of nodes
                         <div class="button-row">
                             <Button
@@ -320,7 +321,7 @@ export default {
             alert();
         },
         getData() {
-            fetch(`https://localhost:5001/project/${this.$route.params.id}`, {
+            fetch(`https://nnvis.herokuapp.com/project/${this.$route.params.id}`, {
                 headers: {
                     Authorization: this.$store.state.jwt,
                 },
@@ -349,13 +350,16 @@ export default {
                                 this.optimiser.type = "sgd";
                                 this.optimiser.learningRate = Number(optimiserData[1]);
                             }
+
+                            this.getDataprep();
                         }
                     });
                 }
             });
-
+        },
+        getDataprep() {
             fetch(
-                `https://localhost:5001/project/${this.$route.params.id}/dataprep`,
+                `https://nnvis.herokuapp.com/project/${this.$route.params.id}/dataprep`,
                 {
                     headers: {
                         Authorization: this.$store.state.jwt,
@@ -386,7 +390,7 @@ export default {
                             this.layerInfo.push({
                                 layerNumber: 2,
                                 size: outputNodes,
-                                activation: "linear",
+                                activation: this.projectInfo.outputActivation,
                             });
                             this.getLayerInfo();
                             this.getDatasetInfo();
@@ -398,7 +402,7 @@ export default {
         },
         getLayerInfo() {
             fetch(
-                `https://localhost:5001/project/${this.$route.params.id}/layer`,
+                `https://nnvis.herokuapp.com/project/${this.$route.params.id}/layer`,
                 {
                     headers: {
                         Authorization: this.$store.state.jwt,
@@ -426,7 +430,7 @@ export default {
         },
         getDatasetInfo() {
             fetch(
-                `https://localhost:5001/dataset/${this.dataprepsInfo[0].datasetId}`,
+                `https://nnvis.herokuapp.com/dataset/${this.dataprepsInfo[0].datasetId}`,
                 {
                     headers: {
                         Authorization: this.$store.state.jwt,
@@ -449,7 +453,7 @@ export default {
         },
         removeDataset() {
             fetch(
-                `https://localhost:5001/project/${this.$route.params.id}/dataprep`,
+                `https://nnvis.herokuapp.com/project/${this.$route.params.id}/dataprep`,
                 {
                     method: "DELETE",
                     headers: {
@@ -476,7 +480,7 @@ export default {
             );
         },
         deleteProject() {
-            fetch(`https://localhost:5001/project/${this.$route.params.id}`, {
+            fetch(`https://nnvis.herokuapp.com/project/${this.$route.params.id}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: this.$store.state.jwt,
@@ -501,8 +505,9 @@ export default {
                 optimiserString += `${this.optimiser.momentumCoefficient}`;
             }
             this.projectInfo.optimiser = optimiserString;
+            this.projectInfo.outputActivation = this.layerInfo[this.layerInfo.length - 1].activation;
 
-            fetch("https://localhost:5001/project", {
+            fetch("https://nnvis.herokuapp.com/project", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -516,7 +521,7 @@ export default {
                             console.log(json.errors);
                             this.$emit("toast", json.errors.join(", "));
                         } else {
-                            fetch("https://localhost:5001/project/layer", {
+                            fetch("https://nnvis.herokuapp.com/project/layer", {
                                 method: this.updatingLayers ? "PUT" : "POST",
                                 headers: {
                                     "Content-Type": "application/json",
@@ -553,7 +558,7 @@ export default {
             });
         },
         editLayer(layerNumber) {
-            if (layerNumber > 1 && layerNumber < this.layerInfo.length) {
+            if (layerNumber > 1) {
                 this.editingLayer = layerNumber;
             }
         },
@@ -724,13 +729,13 @@ export default {
     justify-content: center;
     align-items: center;
 
-    background-color: white;
+    background-color: #ffffff;
     z-index: 2;
 }
 
 .layer:hover .node {
     background-color: var(--blue);
-    color: white;
+    color: #ffffff;
 }
 
 .connections-canvas {

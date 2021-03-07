@@ -10,6 +10,7 @@ import NewProject from "./components/NewProject";
 import EditDataset from "./components/EditDataset";
 import EditProject from "./components/EditProject";
 import ViewDataset from "./components/ViewDataset";
+import ViewProject from "./components/ViewProject";
 import SelectDataset from "./components/SelectDataset";
 import PrepareDataset from "./components/PrepareDataset";
 import Account from "./components/Account";
@@ -62,6 +63,14 @@ const router = new Router({
             component: EditProject,
             meta: {
                 title: "Edit Project"
+            }
+        },
+        {
+            path: "/projects/view/:id",
+            name: "ViewProject",
+            component: ViewProject,
+            meta: {
+                title: "View Project"
             }
         },
         {

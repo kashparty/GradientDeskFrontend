@@ -1,18 +1,10 @@
 pub mod activation;
 pub mod layer;
 pub mod matrix;
-pub mod neural;
+pub mod loss;
+pub mod optimiser;
 
 use wasm_bindgen::prelude::*;
-use serde::{Serialize, Deserialize};
-
-use matrix::Matrix;
-
-#[derive(Serialize, Deserialize)]
-pub struct TestingData {
-    pub inputs: Matrix,
-    pub targets: Matrix,
-}
 
 #[wasm_bindgen]
 pub fn initialise() {

@@ -6,6 +6,11 @@ import router from "./router.js";
 import store from "./store.js";
 import App from "./App.vue";
 
+store.subscribe((mutation, state) => {
+	// Store the state object as a JSON string
+	localStorage.setItem('store', JSON.stringify(state));
+});
+
 Vue.config.productionTip = false;
 
 var firebaseConfig = {

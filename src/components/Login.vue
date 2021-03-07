@@ -66,7 +66,7 @@ export default {
     methods: {
         logIn() {
             this.loggingIn = true;
-            fetch("https://localhost:5001/user/login", {
+            fetch("https://nnvis.herokuapp.com/user/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -95,7 +95,7 @@ export default {
         },
         signUp() {
             this.signingUp = true;
-            fetch("https://localhost:5001/user", {
+            fetch("https://nnvis.herokuapp.com/user", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -126,7 +126,7 @@ export default {
         },
         forgotPassword() {
             if (this.email.length != 0) {
-                fetch("https://localhost:5001/user/resetpassword", {
+                fetch("https://nnvis.herokuapp.com/user/resetpassword", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"

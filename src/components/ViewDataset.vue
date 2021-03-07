@@ -195,7 +195,7 @@ export default {
             correlateY: 0,
 
             chartData: null,
-            chartLayout: null,
+            chartLayout: null
         };
     },
     created() {
@@ -213,7 +213,7 @@ export default {
     },
     methods: {
         getData() {
-            fetch(`https://localhost:5001/dataset/${this.$route.params.id}`, {
+            fetch(`https://nnvis.herokuapp.com/dataset/${this.$route.params.id}`, {
                 headers: {
                     Authorization: this.$store.state.jwt,
                 },
@@ -255,7 +255,7 @@ export default {
             // Fetch the column configurations
             if (this.columnData.length == 0) {
                 fetch(
-                    `https://localhost:5001/dataset/${this.$route.params.id}/columns`,
+                    `https://nnvis.herokuapp.com/dataset/${this.$route.params.id}/columns`,
                     {
                         headers: {
                             Authorization: this.$store.state.jwt,
@@ -317,13 +317,19 @@ export default {
                                 }
 
                                 // Find first non-hidden numerical column
-                                if (this.columnData[this.singleCol].type == "number") {
+                                if (
+                                    this.columnData[this.singleCol].type ==
+                                    "number"
+                                ) {
                                     this.correlateX = this.singleCol;
                                     this.correlateY = this.singleCol;
                                 } else {
                                     found = false;
                                     while (!found && i < cols) {
-                                        if (this.columnData[i].include && this.columnData[i].type == "number") {
+                                        if (
+                                            this.columnData[i].include &&
+                                            this.columnData[i].type == "number"
+                                        ) {
                                             found = true;
                                             this.correlateX = i;
                                             this.correlateY = i;
