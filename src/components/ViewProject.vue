@@ -537,7 +537,7 @@ export default {
                                             `${this.columnData[c].name}: ${this.parsedData[c][r]}`
                                         );
                                     }
-                                } else if (this.dataprepsInfo[c].encoding == "ordinal") {
+                                } else if (this.dataprepsInfo[c].encoding == "ordinal" && counter == 0) {
                                     if (
                                         this.dataprepsInfo[c].usage == "input"
                                     ) {

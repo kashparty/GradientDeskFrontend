@@ -337,8 +337,6 @@ export default {
                 }
             }
 
-            console.log(this.dataprepInfo);
-
             fetch("https://nnvis.herokuapp.com/project", {
                 method: "PUT",
                 headers: {
