@@ -1,4 +1,4 @@
-# backprop
+# GradientDesk
 
 ## Project setup
 ```
