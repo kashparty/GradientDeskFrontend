@@ -14,7 +14,7 @@ store.subscribe((mutation, state) => {
 Vue.config.productionTip = false;
 
 var firebaseConfig = {
-    apiKey: "AIzaSyDNYZX_z732cv3sY5nxVLSUjchjHYp28qw",
+    apiKey: "its_gone_now",
     authDomain: "neuralvis.firebaseapp.com",
     databaseURL: "https://neuralvis.firebaseio.com",
     projectId: "neuralvis",
